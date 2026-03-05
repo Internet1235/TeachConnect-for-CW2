@@ -1,11 +1,11 @@
 {
-  "id": "com.rinlit.test",
-  "name": "Test",
-  "version": "1.0.0",
-  "api_version": "~=0.3.0",
+  "id": "com.Internet123.TeachConnect",
+  "name": "TeachConnect CW插件版",
+  "version": "1.1.0",
+  "api_version": "~=0.4.1",
   "entry": "main.py",
-  "author": "RinLit",
-  "description": "A Class Widgets plugin.",
+  "author": "Wakana_0",
+  "description": "这是TeachConnect CW插件版",
   "url": "",
   "readme": "README.md",
   "icon": "icon.png"
