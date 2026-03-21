@@ -17,13 +17,17 @@ class Plugin(CW2Plugin):
         self.server = None
         # 其他初始化代码...
         self.last_heartbeat = 0
+        self.last_reconnect_time = 0  # 添加重连时间记录
         # 请在此导入第三方库 / Import third-party libraries here
             
     def update_messages(self):
         current_time = time.time()
         
         if self.server is None:
-            self.on_load()
+            # 限制重连频率，每5秒尝试一次
+            if current_time - self.last_reconnect_time > 5:
+                self.last_reconnect_time = current_time
+                self.on_load()
             return
         try:
             if current_time - self.last_heartbeat > 7:
@@ -61,7 +65,8 @@ class Plugin(CW2Plugin):
         except BlockingIOError:
             pass  # 没有新连接时正常继续
         except Exception as e:
-            logger.error(f"接收消息时发生错误: {e}")
+            logger.error(f"update_messages出现未处理异常: {e}")
+            self.server = None
 
     def on_load(self):
         super().on_load()
@@ -75,11 +80,13 @@ class Plugin(CW2Plugin):
         # 创建服务器实例并保存为成员变量
         try:
             self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server.settimeout(3)  # 关键：添加3秒超时，防止connect卡死
             self.server.connect(("frp.freezing.top", 11224))
             self.server.setblocking(False)  # 非阻塞模式
             self.last_heartbeat = time.time()
             logger.info("开始接收消息")
-        except Exception:
+        except Exception as e:
+            logger.error(f"连接服务器失败: {e}")
             self.server = None
 
         self.api.runtime.updated.connect(self.update_messages)
